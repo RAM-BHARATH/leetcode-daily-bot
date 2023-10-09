@@ -1,0 +1,4 @@
+leetcode-bot/
+.env
+__pycache__
+pymongo_get_database.py
