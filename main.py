@@ -6,14 +6,16 @@ import asyncio
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 import scraper
+import json
+# from keep_alive import keep_alive
 
 intents = discord.Intents.all()
 load_dotenv()
 TOKEN = os.environ.get('TOKEN', 3)
-CHANNEL_ID = os.environ.get('CHANNEL_ID', 3)
+CHANNEL_ID = int(os.environ.get('CHANNEL_ID', 3))
+
 
 bot = commands.Bot(command_prefix="/", intents=intents)
-
 
 
 class MyClient(discord.Client):
@@ -26,32 +28,38 @@ class MyClient(discord.Client):
 
     async def on_ready(self):
         print(f'Logged in as {self.user} (ID: {self.user.id})')
+        # setup_hook()
         print('------')
+
+    async def read(self):
+      print('Enters read')
+      with open('question.json', 'r+') as f:
+          question = json.load(f)
+          if(question!={} or question!=""):
+          # print(json.load(f))
+              date = datetime.now(tz=ZoneInfo('Asia/Kolkata'))
+              print(date.date())
+              if(date.date()==datetime.strptime(question['date'], '%Y-%m-%d').date()):
+                  print(question)
+                  return question
+              else:
+                  return scraper.fetch_question()
+          else:
+              return scraper.fetch_question()
 
     async def my_background_task(self):
         await self.wait_until_ready()
-        question = read()
-        channel = self.get_channel(CHANNEL_ID)  # channel ID goes here
-        while not self.is_closed():
-            await channel.send(counter)
-            await asyncio.sleep(20)  # task runs every 60 seconds
-
-def read():
-    with open('question.json') as f:
-        question = json.load(f)
-        if(question!={} or question!=""):
-        # print(json.load(f))
-            date = datetime.now(tz=ZoneInfo('Asia/Kolkata'))
-            print(date.date())
-            if(date.date()==question['date']):
-                # print(question)
-                return question
-            else:
-                scraper.fetch_question()
-                read()
+        question = await self.read()
+        if(question=="Falsey"):
+          question = await self.read()
         else:
-            scraper.fetch_question()
-            read()
+          channel = self.get_channel(CHANNEL_ID)  # channel ID goes here
+          while not self.is_closed():
+              # question += 1
+              await channel.send(str(question))
+              await asyncio.sleep(86400)  # task runs every 60 seconds
+          
+        # question = 0
 
 client = MyClient(intents=discord.Intents.default())
 client.run(TOKEN)
