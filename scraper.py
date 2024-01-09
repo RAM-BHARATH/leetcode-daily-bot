@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import json
 # import pymongo
 
-URL = "https://leetcode.com/problemset/"
+URL = "https://leetcode.com/"
 
 
 class Question:
@@ -65,7 +65,9 @@ def fetch_question():
     #     }  
     # }}'''
   res = requests.post(URL+'graphql', json={'query': query})
-  todays_challenge = res['data']['dailyCodingChallengeV2']['challenge'][-1]
+  res = res.json()
+  # print(res)
+  todays_challenge = res['data']['dailyCodingChallengeV2']['challenges'][-1]
 
 
   question = Question(todays_challenge)
